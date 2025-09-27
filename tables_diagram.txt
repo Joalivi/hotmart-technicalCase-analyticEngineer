@@ -1,0 +1,52 @@
+table purchase{
+  purchase_id bigint [note: 'identificador da compra']
+  buyer_id bigint [note: 'identificador do comprador']
+  prod_item_id bigint [note: 'identificador do item de compra']
+  order_date date [note: 'data do pedido de compra']
+  release_date date [note: 'data de liberação da compra mediante a confirmação do pagamento']
+  producer_id bigint [note: 'identificador do produtor']
+  purchase_partition bigint [note: 'partição no lake para a compra']
+  prod_item_partition bigint [note: 'partição no lake para o item de compra']
+  purchase_total_value float [note: 'valor total da compra']
+  purchase_status string [note: 'status da compra: INICIADA, APROVADA, CANCELADA, REEMBOLSADA']
+  transaction_datetime datetime [note: 'momento de inserção do dado no lake']
+  transaction_date date [note: 'data de inserção do dado no lake']
+}
+
+
+table order_transaction_cost_hist{
+	purchase_id bigint [note: 'identificador da compra']
+  purchase_partition bigint [note: 'partição no lake para a compra']
+  order_transaction_cost_vat_value float [note: 'valor VAT referente a compra']
+  order_transaction_cost_installment_value float [note: 'valor do parcelamento da compra']
+	order_transaction_cost_date date [note: 'data da efetivação do parcelamento']
+  transaction_datetime datetime [note: 'momento de inserção do dado no lake']
+  transaction_date date [note: 'data de inserção do dado no lake']
+}
+
+table product_item{
+  prod_item_id bigint [note: 'identificador do item de compra']
+  prod_item_partition bigint [note: 'partição no lake para o item da compra']
+  product_id bigint [note: 'identificador do produto']
+  item_quantity int [note: 'quantidade comprada por item']
+  purchase_value float [note: 'valor do item de compra']
+  transaction_datetime datetime [note: 'momento de inserção do dado no lake']
+  transaction_date date [note: 'data de inserção do dado no lake']
+}
+
+table purchase_extra_info{
+  purchase_id bigint [note: 'identificador da compra']
+  purchase_partition bigint [note: 'partição no lake para a compra']
+  subsidiary string [note: 'Empresa que, embora controlada (dirigida) por outra, possui grande parte ou o total de suas ações']
+  transaction_datetime datetime [note: 'momento de inserção do dado no lake']
+  transaction_date date [note: 'data de inserção do dado no lake']
+}
+
+Ref: "purchase"."prod_item_id" < "product_item"."prod_item_id"
+Ref: "purchase"."prod_item_partition" < "product_item"."prod_item_partition"
+
+Ref: "order_transaction_cost_hist"."purchase_id" > "purchase"."purchase_id"
+Ref: "order_transaction_cost_hist"."purchase_partition" > "purchase"."purchase_partition"
+
+Ref: "purchase_extra_info"."purchase_id" > "purchase"."purchase_id"
+Ref: "purchase_extra_info"."purchase_partition" > "purchase"."purchase_partition"
